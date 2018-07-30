@@ -31,29 +31,33 @@ static int process_callback(jack_nframes_t nframes, void *arg)
 {
   midi_merger_t *const mm = (midi_merger_t *const) arg;
 
-  // TODO: MIDI events through
+  // Get and clean the output buffer once per cycle.
+  void *output_port_buffer = jack_port_get_buffer(mm->ports[PORT_OUT], nframes);
+  jack_midi_clear_buffer(output_port_buffer);
+
+  // Copy events from the input to the output.
   void *input_port_buffer = jack_port_get_buffer(mm->ports[PORT_IN], nframes);
-  jack_nframes_t event_count = jack_midi_get_event_count(input_port_buffer);
+  jack_nframes_t event_count = jack_midi_get_event_count(input_port_buffer); 
   if (event_count > 0) {
+    
     jack_midi_event_t in_event;
     for (jack_nframes_t i = 0; i < event_count; ++i) {
       jack_midi_event_get(&in_event, input_port_buffer, i);
-
-      const jack_nframes_t sample_offset = 0;
-      int result = -1;
-      result = jack_midi_event_write(mm->ports[PORT_OUT],
-				     sample_offset, in_event.buffer, in_event.size);
+      
+      int result;
+      result = jack_midi_event_write(output_port_buffer,
+				     in_event.time, in_event.buffer, in_event.size);
       switch(result) {
       case 0:
-	// Fine.
-	break;
+  	// Fine.
+  	break;
       case ENOBUFS:
-	fprintf(stderr, "Not enough space for MIDI event.\n");
-	// Fall through
+  	fprintf(stderr, "Not enough space for MIDI event.\n");
+  	// Fall through
       default:
-	fprintf(stderr, "Could not write MIDI event.\n");
-	break;
-      }
+  	fprintf(stderr, "Could not write MIDI event.\n");
+  	break;
+      }      
     }
   }
 
@@ -111,4 +115,30 @@ void jack_finish(void* arg)
   }
   
   free(mm);
+}
+
+
+/**
+ * For testing purposes.
+ */
+int main() {
+  int result = EXIT_FAILURE;
+  jack_options_t options = JackNoStartServer;
+  jack_status_t status;
+  jack_client_t *client = jack_client_open("midi-merger", options, &status);
+  if (client == NULL) {
+    fprintf(stderr, "Opening client failed. Status is %d.\n", status);
+    if (status & JackServerFailed) {
+      fprintf(stderr, "Unable to connect to Jack server.\n");
+    }
+    return EXIT_FAILURE;
+  }
+  
+  result = jack_initialize(client, "");
+
+  while (1) {}
+  
+  jack_finish(client);
+  
+  return result;
 }
