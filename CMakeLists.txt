@@ -35,5 +35,6 @@ set(LIBS ${LIBS} ${JACK_LIBRARIES})
 
 # Position independed code is set automatically
 add_library(${PROJECT_NAME} MODULE src/main.c)
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES PREFIX "")
 
 ##add_executable(${PROJECT_NAME} src/main.c)
