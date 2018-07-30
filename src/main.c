@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 #include <jack/jack.h>
+#include <jack/midiport.h>
 
 
 enum Ports {
@@ -30,6 +32,30 @@ static int process_callback(jack_nframes_t nframes, void *arg)
   midi_merger_t *const mm = (midi_merger_t *const) arg;
 
   // TODO: MIDI events through
+  void *input_port_buffer = jack_port_get_buffer(mm->ports[PORT_IN], nframes);
+  jack_nframes_t event_count = jack_midi_get_event_count(input_port_buffer);
+  if (event_count > 0) {
+    jack_midi_event_t in_event;
+    for (jack_nframes_t i = 0; i < event_count; ++i) {
+      jack_midi_event_get(&in_event, input_port_buffer, i);
+
+      const jack_nframes_t sample_offset = 0;
+      int result = -1;
+      result = jack_midi_event_write(mm->ports[PORT_OUT],
+				     sample_offset, in_event.buffer, in_event.size);
+      switch(result) {
+      case 0:
+	// Fine.
+	break;
+      case ENOBUFS:
+	fprintf(stderr, "Not enough space for MIDI event.\n");
+	// Fall through
+      default:
+	fprintf(stderr, "Could not write MIDI event.\n");
+	break;
+      }
+    }
+  }
 
   return 0;
 }
