@@ -8,12 +8,12 @@
 enum Ports {
     PORT_IN,
     PORT_OUT,
-    PORT_COUNT // this is used as an array index
+    PORT_ARRAY_SIZE // this is not used as a port index
 };
 
 typedef struct MIDI_MERGER_T {
   jack_client_t *client;
-  jack_port_t *ports[PORT_COUNT];
+  jack_port_t *ports[PORT_ARRAY_SIZE];
 } midi_merger_t;
 
 /**
