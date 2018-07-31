@@ -153,7 +153,7 @@ int jack_initialize(jack_client_t* client, const char* load_init)
 
   mm->client = client;
 
-  // Register ports. We fake a physical output port.
+  // Register ports.
   mm->ports[PORT_IN] = jack_port_register(client, "in",
 					  JACK_DEFAULT_MIDI_TYPE,
 					  JackPortIsInput, 0);
