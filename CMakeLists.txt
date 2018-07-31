@@ -24,7 +24,7 @@ project(mod-midi-merger
     LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
@@ -43,4 +43,5 @@ add_executable(${PROJECT_NAME}-test
                src/midi-merger.h src/midi-merger.c)
 target_link_libraries(${PROJECT_NAME}-test ${LIBS})
 
-install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION /usr/lib/jack)
+set(CMAKE_INSTALL_PREFIX /usr)
+install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/jack)
