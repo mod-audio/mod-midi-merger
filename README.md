@@ -1,6 +1,6 @@
 # mod-midi-merger
 
-A small Jack-internal client to merge MIDI events from seveal inputs
+A small Jack-internal client to merge MIDI events from several inputs
 to one output.
 
 ## Build
@@ -16,7 +16,7 @@ to install the shared library in `/usr/lib/jack/mod-midi-merger.so` run
 $ make install
 ```
 
-Advance usage examples:
+Advance build usage examples:
 
 ```bash
 $ cmake -DCMAKE_BUILD_TYPE=Debug
