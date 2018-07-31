@@ -128,7 +128,7 @@ static void port_registration_callback(jack_port_id_t port_id, int is_registered
 	// Don't connect a loop to our own port
 	if (source != mm->ports[PORT_OUT]) {
 
-	  // Don't connect to a port of a plugin.
+	  // Don't connect to a port of a plugin in mod-host.
 	  if (strncmp(jack_port_name(source), "effect_", 7) != 0) {
 
 	    // We can't call jack_connect here in this
