@@ -168,6 +168,10 @@ int jack_initialize(jack_client_t* client, const char* load_init)
     }
   }
 
+  // Set port aliases
+  jack_port_set_alias(mm->ports[PORT_IN], "MIDI in");
+  jack_port_set_alias(mm->ports[PORT_OUT], "MIDI out");  
+
   // Create the ringbuffer (single-producer/single-consumer) for
   // scheduled port connections. It contains elements of type
   // `jack_port_id_t`.
