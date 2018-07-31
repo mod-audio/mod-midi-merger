@@ -15,7 +15,7 @@ enum Ports {
     PORT_ARRAY_SIZE // this is not used as a port index
 };
 
-const size_t queue_size = 64*sizeof(jack_port_id_t);
+static const size_t queue_size = 64*sizeof(jack_port_id_t);
 
 typedef struct MIDI_MERGER_T {
   jack_client_t *client;

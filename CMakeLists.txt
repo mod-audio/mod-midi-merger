@@ -38,7 +38,9 @@ add_library(${PROJECT_NAME} MODULE
             src/midi-merger.h src/midi-merger.c)
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES PREFIX "")
 
-#add_executable(${PROJECT_NAME}-debug src/main.c)
-#target_link_libraries(${PROJECT_NAME}-debug ${LIBS})
+add_executable(${PROJECT_NAME}-test
+	       src/test.c
+               src/midi-merger.h src/midi-merger.c)
+target_link_libraries(${PROJECT_NAME}-test ${LIBS})
 
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION /usr/lib/jack)
