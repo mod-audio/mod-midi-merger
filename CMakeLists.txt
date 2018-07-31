@@ -34,10 +34,11 @@ include_directories(${JACK_INCLUDE_DIRS})
 set(LIBS ${LIBS} ${JACK_LIBRARIES})
 
 # Position independed code is set automatically
-add_library(${PROJECT_NAME} MODULE src/main.c)
+add_library(${PROJECT_NAME} MODULE
+            src/midi-merger.h src/midi-merger.c)
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES PREFIX "")
 
-add_executable(${PROJECT_NAME}-debug src/main.c)
-target_link_libraries(${PROJECT_NAME}-debug ${LIBS})
+#add_executable(${PROJECT_NAME}-debug src/main.c)
+#target_link_libraries(${PROJECT_NAME}-debug ${LIBS})
 
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION /usr/lib/jack)
