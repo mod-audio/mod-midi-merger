@@ -146,7 +146,7 @@ int jack_initialize(jack_client_t* client, const char* load_init)
 					  JackPortIsInput, 0);
   mm->ports[PORT_OUT] = jack_port_register(client, "out",
 					   JACK_DEFAULT_MIDI_TYPE,
-					   JackPortIsOutput | JackPortIsPhysical, 0);
+					   JackPortIsOutput, 0);
   for (int i = 0; i < PORT_ARRAY_SIZE; ++i) {
     if (!mm->ports[i]) {
       fprintf(stderr, "Can't register jack port\n");
