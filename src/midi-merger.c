@@ -45,10 +45,10 @@ jack_port_id_t next(jack_ringbuffer_t *queue) {
 }
 
 
-static int process_callback(jack_nframes_t nframes, void *arg)
-{
-  midi_merger_t *const mm = (midi_merger_t *const) arg;
-
+/**
+ * Connect any outstanding Jack ports.
+ */
+void handle_scheduled_connections(midi_merger_t *const mm) {
   // Check if there are connections scheduled.
   jack_port_id_t source = next(mm->ports_to_connect);
 
@@ -69,6 +69,14 @@ static int process_callback(jack_nframes_t nframes, void *arg)
       break;
     }
   }
+}
+
+
+static int process_callback(jack_nframes_t nframes, void *arg)
+{
+  midi_merger_t *const mm = (midi_merger_t *const) arg;
+
+  handle_scheduled_connections(mm);
 
   // Get and clean the output buffer once per cycle.
   void *output_port_buffer = jack_port_get_buffer(mm->ports[PORT_OUT], nframes);
@@ -116,12 +124,17 @@ static void port_registration_callback(jack_port_id_t port_id, int is_registered
     // Check if MIDI output
     if (jack_port_flags(source) & JackPortIsOutput) {
       if (strcmp(jack_port_type(source), JACK_DEFAULT_MIDI_TYPE) == 0) {
-	
+
 	// Don't connect a loop to our own port
 	if (source != mm->ports[PORT_OUT]) {
-	  // We can't call jack_connect here in this
-	  // callback. Schedule the connection for later.
-	  push_back(mm->ports_to_connect, port_id);
+
+	  // Don't connect to a port of a plugin.
+	  if (strncmp(jack_port_name(source), "effect_", 7) != 0) {
+
+	    // We can't call jack_connect here in this
+	    // callback. Schedule the connection for later.
+	    push_back(mm->ports_to_connect, port_id); 
+	  }
 	}
       }
     }
