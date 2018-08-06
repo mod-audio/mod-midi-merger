@@ -152,7 +152,7 @@ static void port_registration_callback(jack_port_id_t port_id, int is_registered
 void *supervise(void *arg) {
   midi_merger_t *const mm = (midi_merger_t *const) arg;
   
-  while (1) {
+  while (mm->do_exit == false) {
     handle_scheduled_connections(mm);
   }
   return NULL;
@@ -197,6 +197,7 @@ int jack_initialize(jack_client_t* client, const char* load_init)
   jack_set_port_registration_callback(client, port_registration_callback, mm);
 
   // Init the connection supervisor worker thread
+  mm->do_exit = false;
   int rc = pthread_create(&(mm->connection_supervisor), NULL, &supervise, mm);
   if (rc != 0) {
     fprintf(stderr, "Can't create worker thread\n");
@@ -226,6 +227,8 @@ void jack_finish(void* arg)
     jack_port_unregister(mm->client, mm->ports[i]);
   }
 
+  mm->do_exit = true;
+  pthread_join(mm->connection_supervisor, NULL);
   jack_ringbuffer_free(mm->ports_to_connect);
   
   free(mm);
