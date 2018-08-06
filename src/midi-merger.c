@@ -89,22 +89,25 @@ static int process_callback(jack_nframes_t nframes, void *arg)
     
     jack_midi_event_t in_event;
     for (jack_nframes_t i = 0; i < event_count; ++i) {
-      jack_midi_event_get(&in_event, input_port_buffer, i);
-      
-      int result;
-      result = jack_midi_event_write(output_port_buffer,
-				     in_event.time, in_event.buffer, in_event.size);
-      switch(result) {
-      case 0:
-  	// Fine.
-  	break;
-      case ENOBUFS:
-  	fprintf(stderr, "Not enough space for MIDI event.\n");
-  	// Fall through
-      default:
-  	fprintf(stderr, "Could not write MIDI event.\n");
-  	break;
-      }      
+      const int SUCCESS = 0;
+      if (jack_midi_event_get(&in_event, input_port_buffer, i) == SUCCESS) {	
+	int result;
+	result = jack_midi_event_write(output_port_buffer,
+				       in_event.time, in_event.buffer, in_event.size);
+	switch(result) {
+	case 0:
+	  // Fine.
+	  break;
+	case ENOBUFS:
+	  fprintf(stderr, "Not enough space for MIDI event.\n");
+	  // Fall through
+	default:
+	  fprintf(stderr, "Could not write MIDI event.\n");
+	  break;
+	}
+      } else {
+	// ENODATA if buffer is empty. We don't handle this and go on.
+      }
     }
   }
 
