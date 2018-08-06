@@ -8,6 +8,7 @@
 #include <jack/jack.h>
 #include <jack/midiport.h>
 #include <jack/ringbuffer.h>
+#include <pthread.h>
 
 enum Ports {
     PORT_IN,
@@ -21,6 +22,8 @@ typedef struct MIDI_MERGER_T {
   jack_client_t *client;
   jack_port_t *ports[PORT_ARRAY_SIZE];
   jack_ringbuffer_t *ports_to_connect;
+
+  pthread_t connection_supervisor;
 } midi_merger_t;
 
 /**

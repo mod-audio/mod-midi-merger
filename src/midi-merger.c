@@ -2,6 +2,7 @@
 
 /**
  * Add a port_id to the waiting queue.
+ * It is a producer in the realtime context.
  */
 size_t push_back(jack_ringbuffer_t *queue, jack_port_id_t port_id) {
   size_t written = 0;
@@ -47,6 +48,7 @@ jack_port_id_t next(jack_ringbuffer_t *queue) {
 
 /**
  * Connect any outstanding Jack ports.
+ * It is a consumer in the non-realtime context.
  */
 void handle_scheduled_connections(midi_merger_t *const mm) {
   // Check if there are connections scheduled.
@@ -75,8 +77,6 @@ void handle_scheduled_connections(midi_merger_t *const mm) {
 static int process_callback(jack_nframes_t nframes, void *arg)
 {
   midi_merger_t *const mm = (midi_merger_t *const) arg;
-
-  handle_scheduled_connections(mm);
 
   // Get and clean the output buffer once per cycle.
   void *output_port_buffer = jack_port_get_buffer(mm->ports[PORT_OUT], nframes);
@@ -146,6 +146,18 @@ static void port_registration_callback(jack_port_id_t port_id, int is_registered
 }
 
 
+/**
+ * `Supervise` handles the non-realtime port connections.
+ */
+void *supervise(void *arg) {
+  midi_merger_t *const mm = (midi_merger_t *const) arg;
+  
+  while (1) {
+    handle_scheduled_connections(mm);
+  }
+  return NULL;
+}
+
 int jack_initialize(jack_client_t* client, const char* load_init)
 {
   midi_merger_t *const mm = malloc(sizeof(midi_merger_t));
@@ -155,7 +167,7 @@ int jack_initialize(jack_client_t* client, const char* load_init)
   }
 
   mm->client = client;
-
+ 
   // Register ports.
   mm->ports[PORT_IN] = jack_port_register(client, "in",
 					  JACK_DEFAULT_MIDI_TYPE,
@@ -184,6 +196,13 @@ int jack_initialize(jack_client_t* client, const char* load_init)
   jack_set_process_callback(client, process_callback, mm);
   jack_set_port_registration_callback(client, port_registration_callback, mm);
 
+  // Init the connection supervisor worker thread
+  int rc = pthread_create(&(mm->connection_supervisor), NULL, &supervise, mm);
+  if (rc != 0) {
+    fprintf(stderr, "Can't create worker thread\n");
+    return EXIT_FAILURE;
+  }
+  
   /* Activate the jack client */
   if (jack_activate(client) != 0) {
     fprintf(stderr, "can't activate jack client\n");

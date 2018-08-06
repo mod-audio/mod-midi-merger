@@ -33,6 +33,10 @@ find_package(Jack REQUIRED)
 include_directories(${JACK_INCLUDE_DIRS})
 set(LIBS ${LIBS} ${JACK_LIBRARIES})
 
+# Pthread dependency
+find_package(Threads)
+set(LIBS ${LIBS} ${CMAKE_THREAD_LIBS_INIT})
+
 # Position independed code is set automatically
 add_library(${PROJECT_NAME} MODULE
             src/midi-merger.h src/midi-merger.c)
