@@ -24,7 +24,7 @@ typedef struct MIDI_MERGER_T {
   jack_port_t *ports[PORT_ARRAY_SIZE];
   jack_ringbuffer_t *ports_to_connect;
 
-  int do_exit;
+  bool do_exit;
   pthread_t connection_supervisor;
 } midi_merger_t;
 
