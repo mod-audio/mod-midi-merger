@@ -23,6 +23,22 @@ to install the shared library in `/usr/lib/jack/mod-midi-merger.so` run
 $ make install
 ```
 
+## Usage
+
+You can start `mod-midi-merger-test` for a normal Jack client or load
+`mod-midi-merger.so` as an internal client. Either way it shows up as:
+
+```bash
+$ jack_lsp --aliases
+...
+midi-merger:in
+   MIDI in
+midi-merger:out
+   MIDI out
+```
+
+## Advanced
+
 Advance build usage examples:
 
 ```bash
