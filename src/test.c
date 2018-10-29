@@ -15,7 +15,9 @@ int main() {
   
   result = jack_initialize(client, "");
 
-  while (1) {}
+  while (1) {
+    sleep(60);
+  }
   
   jack_finish(client);
   

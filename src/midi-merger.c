@@ -1,5 +1,7 @@
 #include "midi-merger.h"
 
+#include <unistd.h>
+
 /**
  * Add a port_id to the waiting queue.
  * It is a producer in the realtime context.
@@ -154,6 +156,7 @@ void *supervise(void *arg) {
   
   while (mm->do_exit == false) {
     handle_scheduled_connections(mm);
+    sleep(1);
   }
   return NULL;
 }
