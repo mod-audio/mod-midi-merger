@@ -56,6 +56,6 @@ add_executable(mod-midi-broadcaster-standalone
                src/midi-broadcaster.h src/midi-broadcaster.c)
 target_link_libraries(mod-midi-broadcaster-standalone ${LIBS})
 
-
 set(CMAKE_INSTALL_PREFIX /usr)
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/jack)
+install(TARGETS mod-midi-broadcaster LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/jack)
