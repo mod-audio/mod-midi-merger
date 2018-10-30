@@ -42,10 +42,20 @@ add_library(${PROJECT_NAME} MODULE
             src/midi-merger.h src/midi-merger.c)
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES PREFIX "")
 
-add_executable(${PROJECT_NAME}-test
+add_library(mod-midi-broadcaster MODULE
+            src/midi-broadcaster.h src/midi-broadcaster.c)
+SET_TARGET_PROPERTIES(mod-midi-broadcaster PROPERTIES PREFIX "")
+
+add_executable(${PROJECT_NAME}-standalone
 	       src/standalone-midi-merger.c
                src/midi-merger.h src/midi-merger.c)
-target_link_libraries(${PROJECT_NAME}-test ${LIBS})
+target_link_libraries(${PROJECT_NAME}-standalone ${LIBS})
+
+add_executable(mod-midi-broadcaster-standalone
+	       src/standalone-midi-broadcaster.c
+               src/midi-broadcaster.h src/midi-broadcaster.c)
+target_link_libraries(mod-midi-broadcaster-standalone ${LIBS})
+
 
 set(CMAKE_INSTALL_PREFIX /usr)
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/jack)
