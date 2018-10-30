@@ -43,7 +43,7 @@ add_library(${PROJECT_NAME} MODULE
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES PREFIX "")
 
 add_executable(${PROJECT_NAME}-test
-	       src/test.c
+	       src/standalone-midi-merger.c
                src/midi-merger.h src/midi-merger.c)
 target_link_libraries(${PROJECT_NAME}-test ${LIBS})
 
