@@ -4,7 +4,7 @@ int main() {
   int result = EXIT_FAILURE;
   jack_options_t options = JackNoStartServer;
   jack_status_t status;
-  jack_client_t *client = jack_client_open("midi-merger", options, &status);
+  jack_client_t *client = jack_client_open("mod-midi-merger", options, &status);
   if (client == NULL) {
     fprintf(stderr, "Opening client failed. Status is %d.\n", status);
     if (status & JackServerFailed) {

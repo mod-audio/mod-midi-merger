@@ -132,7 +132,7 @@ static void port_registration_callback(jack_port_id_t port_id, int is_registered
 	if (source != mm->ports[PORT_IN]) {
 
 	  if ((strncmp(jack_port_name(source), "effect_", 7) == 0) ||
-	      (strncmp(jack_port_name(source), "mod-midi-merger", 15) == 0)
+	      (strncmp(jack_port_name(source), "midi-merger", 15) == 0)
 	      ) {
 	    // Don't connect to a port of a plugin in mod-host or the
 	    // MIDI merger.
