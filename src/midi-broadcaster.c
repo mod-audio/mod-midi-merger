@@ -125,23 +125,13 @@ static void port_registration_callback(jack_port_id_t port_id, int is_registered
   if (is_registered) {
     jack_port_t *source = jack_port_by_id(mm->client, port_id);
     // Check if MIDI input
-    if (jack_port_flags(source) & JackPortIsInput) {
+    const int flags = JackPortIsTerminal|JackPortIsPhysical|JackPortIsInput;
+    if ((jack_port_flags(source) & flags) == flags) {
       if (strcmp(jack_port_type(source), JACK_DEFAULT_MIDI_TYPE) == 0) {
 
-        // Don't connect a loop to our own port
-        if (source != mm->ports[PORT_IN]) {
-
-          if ((strncmp(jack_port_name(source), "effect_", 7) == 0) ||
-              (strncmp(jack_port_name(source), "midi-merger", 15) == 0)
-              ) {
-            // Don't connect to a port of a plugin in mod-host or the
-            // MIDI merger.
-          } else {
-            // We can't call jack_connect here in the
-            // realtime-context. Schedule the connection for later.
-            push_back(mm->ports_to_connect, port_id);
-          }
-        }
+        // We can't call jack_connect here in the callback,
+        // Schedule the connection for later.
+        push_back(mm->ports_to_connect, port_id);
       }
     }
   }
@@ -175,10 +165,10 @@ int jack_initialize(jack_client_t* client, const char* load_init)
   // Register ports.
   mm->ports[PORT_IN] = jack_port_register(client, "in",
                                           JACK_DEFAULT_MIDI_TYPE,
-                                          JackPortIsPhysical | JackPortIsInput, 0);
+                                          JackPortIsInput, 0);
   mm->ports[PORT_OUT] = jack_port_register(client, "out",
                                            JACK_DEFAULT_MIDI_TYPE,
-                                           JackPortIsPhysical | JackPortIsOutput, 0);
+                                           JackPortIsOutput, 0);
   for (int i = 0; i < PORT_ARRAY_SIZE; ++i) {
     if (!mm->ports[i]) {
       fprintf(stderr, "Can't register jack port\n");
