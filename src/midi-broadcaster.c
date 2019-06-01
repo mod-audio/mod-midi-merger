@@ -212,7 +212,7 @@ int jack_initialize(jack_client_t* client, const char* load_init)
   {
       const char* const ourportname = jack_port_name(mm->ports[PORT_OUT]);
 
-      for (int i=0; ports[i] != NULL; ++i) {
+      for (int i=0; ports[i] != NULL; ++i)
           jack_connect(client, ourportname, ports[i]);
 
       jack_free(ports);
