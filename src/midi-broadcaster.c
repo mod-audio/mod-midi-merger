@@ -17,7 +17,7 @@ size_t push_back(jack_ringbuffer_t *queue, jack_port_id_t port_id) {
     size_t write_space = jack_ringbuffer_write_space(queue);
     if (write_space >= sizeof(jack_port_id_t)) {
       written = jack_ringbuffer_write(queue,
-                                      &port_id,
+                                      (const char*)&port_id,
                                       sizeof(jack_port_id_t));
       if (written < sizeof(jack_port_id_t)) {
         fprintf(stderr, "Could not schedule port connection.\n");
@@ -33,7 +33,7 @@ size_t push_back(jack_ringbuffer_t *queue, jack_port_id_t port_id) {
  */
 jack_port_id_t next(jack_ringbuffer_t *queue) {
   size_t read = 0;
-  jack_port_id_t id = NULL;
+  jack_port_id_t id = 0;
 
   if (queue == NULL) {
     fprintf(stderr, "Queue memory problem.\n");
@@ -55,7 +55,7 @@ void handle_scheduled_connections(midi_broadcaster_t *const mm) {
   // Check if there are connections scheduled.
   jack_port_id_t source = next(mm->ports_to_connect);
 
-  if (source != NULL) {
+  if (source != 0) {
     int result;
     result = jack_connect(mm->client,
                           jack_port_name(mm->ports[PORT_OUT]) ,

@@ -1,4 +1,5 @@
 #include "midi-merger.h"
+#include <unistd.h>
 
 int main() {
   int result = EXIT_FAILURE;
