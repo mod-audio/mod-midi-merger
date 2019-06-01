@@ -1,2 +1,9 @@
 build/
+CMakeFiles/
 *~
+*.cmake
+*.so
+CMakeCache.txt
+Makefile
+mod-midi-broadcaster-standalone
+mod-midi-merger-standalone
