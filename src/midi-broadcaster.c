@@ -2,6 +2,9 @@
 
 #include <unistd.h>
 
+/* port flags to connect to */
+static const int target_port_flags = JackPortIsTerminal|JackPortIsPhysical|JackPortIsInput;
+
 /**
  * Add a port_id to the waiting queue.
  * It is a producer in the realtime context.
@@ -125,8 +128,7 @@ static void port_registration_callback(jack_port_id_t port_id, int is_registered
   if (is_registered) {
     jack_port_t *source = jack_port_by_id(mm->client, port_id);
     // Check if MIDI input
-    const int flags = JackPortIsTerminal|JackPortIsPhysical|JackPortIsInput;
-    if ((jack_port_flags(source) & flags) == flags) {
+    if ((jack_port_flags(source) & target_port_flags) == target_port_flags) {
       if (strcmp(jack_port_type(source), JACK_DEFAULT_MIDI_TYPE) == 0) {
 
         // We can't call jack_connect here in the callback,
@@ -203,6 +205,17 @@ int jack_initialize(jack_client_t* client, const char* load_init)
     fprintf(stderr, "can't activate jack client\n");
     free(mm);
     return EXIT_FAILURE;
+  }
+
+  const char **const ports = jack_get_ports(client, "", JACK_DEFAULT_MIDI_TYPE, target_port_flags);
+  if (ports != NULL)
+  {
+      const char* const ourportname = jack_port_name(mm->ports[PORT_OUT]);
+
+      for (int i=0; ports[i] != NULL; ++i) {
+          jack_connect(client, ourportname, ports[i]);
+
+      jack_free(ports);
   }
 
   return 0;
