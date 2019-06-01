@@ -12,14 +12,14 @@ int main() {
     }
     return EXIT_FAILURE;
   }
-  
+
   result = jack_initialize(client, "");
 
   while (1) {
     sleep(60);
   }
-  
+
   jack_finish(client);
-  
+
   return result;
 }

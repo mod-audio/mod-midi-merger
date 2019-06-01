@@ -17,10 +17,10 @@ size_t push_back(jack_ringbuffer_t *queue, jack_port_id_t port_id) {
     size_t write_space = jack_ringbuffer_write_space(queue);
     if (write_space >= sizeof(jack_port_id_t)) {
       written = jack_ringbuffer_write(queue,
-				      &port_id,
-				      sizeof(jack_port_id_t));
+                                      &port_id,
+                                      sizeof(jack_port_id_t));
       if (written < sizeof(jack_port_id_t)) {
-	fprintf(stderr, "Could not schedule port connection.\n");
+        fprintf(stderr, "Could not schedule port connection.\n");
       }
     }
   }
@@ -58,8 +58,8 @@ void handle_scheduled_connections(midi_broadcaster_t *const mm) {
   if (source != NULL) {
     int result;
     result = jack_connect(mm->client,
-			  jack_port_name(mm->ports[PORT_OUT]) ,
-        jack_port_name(jack_port_by_id(mm->client, source)));
+                          jack_port_name(mm->ports[PORT_OUT]) ,
+                          jack_port_name(jack_port_by_id(mm->client, source)));
     switch(result) {
     case 0:
       // Fine.
@@ -92,22 +92,22 @@ static int process_callback(jack_nframes_t nframes, void *arg)
     for (jack_nframes_t i = 0; i < event_count; ++i) {
       const int SUCCESS = 0;
       if (jack_midi_event_get(&in_event, input_port_buffer, i) == SUCCESS) {
-	int result;
-	result = jack_midi_event_write(output_port_buffer,
-				       in_event.time, in_event.buffer, in_event.size);
-	switch(result) {
-	case 0:
-	  // Fine.
-	  break;
-	case ENOBUFS:
-	  fprintf(stderr, "Not enough space for MIDI event.\n");
-	  // Fall through
-	default:
-	  fprintf(stderr, "Could not write MIDI event.\n");
-	  break;
-	}
+        int result;
+        result = jack_midi_event_write(output_port_buffer,
+                          in_event.time, in_event.buffer, in_event.size);
+        switch(result) {
+        case 0:
+          // Fine.
+          break;
+        case ENOBUFS:
+          fprintf(stderr, "Not enough space for MIDI event.\n");
+          // Fall through
+        default:
+          fprintf(stderr, "Could not write MIDI event.\n");
+          break;
+        }
       } else {
-	// ENODATA if buffer is empty. We don't handle this and go on.
+        // ENODATA if buffer is empty. We don't handle this and go on.
       }
     }
   }
@@ -128,20 +128,20 @@ static void port_registration_callback(jack_port_id_t port_id, int is_registered
     if (jack_port_flags(source) & JackPortIsInput) {
       if (strcmp(jack_port_type(source), JACK_DEFAULT_MIDI_TYPE) == 0) {
 
-	// Don't connect a loop to our own port
-	if (source != mm->ports[PORT_IN]) {
+        // Don't connect a loop to our own port
+        if (source != mm->ports[PORT_IN]) {
 
-	  if ((strncmp(jack_port_name(source), "effect_", 7) == 0) ||
-	      (strncmp(jack_port_name(source), "midi-merger", 15) == 0)
-	      ) {
-	    // Don't connect to a port of a plugin in mod-host or the
-	    // MIDI merger.
-	  } else {
-	    // We can't call jack_connect here in the
-	    // realtime-context. Schedule the connection for later.
-	    push_back(mm->ports_to_connect, port_id);
-	  }
-	}
+          if ((strncmp(jack_port_name(source), "effect_", 7) == 0) ||
+              (strncmp(jack_port_name(source), "midi-merger", 15) == 0)
+              ) {
+            // Don't connect to a port of a plugin in mod-host or the
+            // MIDI merger.
+          } else {
+            // We can't call jack_connect here in the
+            // realtime-context. Schedule the connection for later.
+            push_back(mm->ports_to_connect, port_id);
+          }
+        }
       }
     }
   }
@@ -174,11 +174,11 @@ int jack_initialize(jack_client_t* client, const char* load_init)
 
   // Register ports.
   mm->ports[PORT_IN] = jack_port_register(client, "in",
-					  JACK_DEFAULT_MIDI_TYPE,
-					  JackPortIsPhysical | JackPortIsInput, 0);
+                                          JACK_DEFAULT_MIDI_TYPE,
+                                          JackPortIsPhysical | JackPortIsInput, 0);
   mm->ports[PORT_OUT] = jack_port_register(client, "out",
-					   JACK_DEFAULT_MIDI_TYPE,
-					   JackPortIsPhysical | JackPortIsOutput, 0);
+                                           JACK_DEFAULT_MIDI_TYPE,
+                                           JackPortIsPhysical | JackPortIsOutput, 0);
   for (int i = 0; i < PORT_ARRAY_SIZE; ++i) {
     if (!mm->ports[i]) {
       fprintf(stderr, "Can't register jack port\n");
