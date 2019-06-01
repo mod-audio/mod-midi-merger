@@ -48,12 +48,12 @@ add_library(mod-midi-broadcaster MODULE
 SET_TARGET_PROPERTIES(mod-midi-broadcaster PROPERTIES PREFIX "")
 
 add_executable(${PROJECT_NAME}-standalone
-	       src/standalone-midi-merger.c
+               src/standalone-midi-merger.c
                src/midi-merger.h src/midi-merger.c)
 target_link_libraries(${PROJECT_NAME}-standalone ${LIBS})
 
 add_executable(mod-midi-broadcaster-standalone
-	       src/standalone-midi-broadcaster.c
+               src/standalone-midi-broadcaster.c
                src/midi-broadcaster.h src/midi-broadcaster.c)
 target_link_libraries(mod-midi-broadcaster-standalone ${LIBS})
 
