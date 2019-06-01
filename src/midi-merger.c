@@ -54,9 +54,9 @@ jack_port_id_t next(jack_ringbuffer_t *queue) {
  */
 void handle_scheduled_connections(midi_merger_t *const mm) {
   // Check if there are connections scheduled.
-  jack_port_id_t source = next(mm->ports_to_connect);
+  jack_port_id_t source;
 
-  if (source != 0) {
+  while ((source = next(mm->ports_to_connect)) != 0) {
     int result;
     result = jack_connect(mm->client,
                           jack_port_name(jack_port_by_id(mm->client, source)),
