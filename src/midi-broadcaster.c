@@ -210,12 +210,22 @@ int jack_initialize(jack_client_t* client, const char* load_init)
   const char **const ports = jack_get_ports(client, "", JACK_DEFAULT_MIDI_TYPE, target_port_flags);
   if (ports != NULL)
   {
-      const char* const ourportname = jack_port_name(mm->ports[PORT_OUT]);
+    char  aliases[2][320];
+    char* aliasesptr[2] = { aliases[0], aliases[1] };
+    const char* const ourportname = jack_port_name(mm->ports[PORT_OUT]);
 
-      for (int i=0; ports[i] != NULL; ++i)
-          jack_connect(client, ourportname, ports[i]);
+    for (int i=0; ports[i] != NULL; ++i) {
+      if (strncmp(ports[i], "system:midi_playback_", 21) == 0) {
+        if (jack_port_get_aliases(jack_port_by_name(client, ports[i]), aliasesptr) > 0) {
+          if (strncmp(aliases[0], "alsa_pcm:Midi-Through/", 22) == 0) {
+            continue;
+          }
+        }
+      }
+      jack_connect(client, ourportname, ports[i]);
+    }
 
-      jack_free(ports);
+    jack_free(ports);
   }
 
   return 0;
