@@ -136,6 +136,7 @@ static void port_registration_callback(jack_port_id_t port_id, int is_registered
         // We can't call jack_connect here in the callback,
         // Schedule the connection for later.
         push_back(mm->ports_to_connect, port_id);
+        sem_post(&mm->sem);
       }
     }
   }
@@ -151,7 +152,7 @@ void *supervise(void *arg) {
 
   while (mm->do_exit == false) {
     handle_scheduled_connections(mm);
-    sleep(1);
+    sem_wait(&mm->sem);
   }
   return NULL;
 }
@@ -195,6 +196,7 @@ int jack_initialize(jack_client_t* client, const char* load_init)
   jack_set_port_registration_callback(client, port_registration_callback, mm);
 
   // Init the connection supervisor worker thread
+  sem_init(&mm->sem, 0, 0);
   mm->do_exit = false;
   int rc = pthread_create(&(mm->connection_supervisor), NULL, &supervise, mm);
   if (rc != 0) {
@@ -245,7 +247,9 @@ void jack_finish(void* arg)
   }
 
   mm->do_exit = true;
+  sem_post(&mm->sem);
   pthread_join(mm->connection_supervisor, NULL);
+  sem_destroy(&mm->sem);
   jack_ringbuffer_free(mm->ports_to_connect);
 
   free(mm);

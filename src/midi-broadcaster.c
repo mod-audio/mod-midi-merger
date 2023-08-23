@@ -80,41 +80,7 @@ void handle_scheduled_connections(midi_broadcaster_t *const mm) {
 
 static int process_callback(jack_nframes_t nframes, void *arg)
 {
-  midi_broadcaster_t *const mm = (midi_broadcaster_t *const) arg;
-
-  // Get and clean the output buffer once per cycle.
-  void *output_port_buffer = jack_port_get_buffer(mm->ports[PORT_OUT], nframes);
-  jack_midi_clear_buffer(output_port_buffer);
-
-  // Copy events from the input to the output.
-  void *input_port_buffer = jack_port_get_buffer(mm->ports[PORT_IN], nframes);
-  jack_nframes_t event_count = jack_midi_get_event_count(input_port_buffer);
-  if (event_count > 0) {
-
-    jack_midi_event_t in_event;
-    for (jack_nframes_t i = 0; i < event_count; ++i) {
-      const int SUCCESS = 0;
-      if (jack_midi_event_get(&in_event, input_port_buffer, i) == SUCCESS) {
-        int result;
-        result = jack_midi_event_write(output_port_buffer,
-                          in_event.time, in_event.buffer, in_event.size);
-        switch(result) {
-        case 0:
-          // Fine.
-          break;
-        case ENOBUFS:
-          fprintf(stderr, "Not enough space for MIDI event.\n");
-          // Fall through
-        default:
-          fprintf(stderr, "Could not write MIDI event.\n");
-          break;
-        }
-      } else {
-        // ENODATA if buffer is empty. We don't handle this and go on.
-      }
-    }
-  }
-
+  // nothing here, `jack_port_tie` takes care of buffer zero-copy
   return 0;
 }
 
@@ -134,6 +100,7 @@ static void port_registration_callback(jack_port_id_t port_id, int is_registered
         // We can't call jack_connect here in the callback,
         // Schedule the connection for later.
         push_back(mm->ports_to_connect, port_id);
+        sem_post(&mm->sem);
       }
     }
   }
@@ -149,7 +116,7 @@ void *supervise(void *arg) {
 
   while (mm->do_exit == false) {
     handle_scheduled_connections(mm);
-    sleep(1);
+    sem_wait(&mm->sem);
   }
   return NULL;
 }
@@ -179,6 +146,8 @@ int jack_initialize(jack_client_t* client, const char* load_init)
     }
   }
 
+  jack_port_tie(mm->ports[PORT_IN], mm->ports[PORT_OUT]);
+
   // Set port aliases
   jack_port_set_alias(mm->ports[PORT_IN], "MIDI in");
   jack_port_set_alias(mm->ports[PORT_OUT], "MIDI out");
@@ -193,6 +162,7 @@ int jack_initialize(jack_client_t* client, const char* load_init)
   jack_set_port_registration_callback(client, port_registration_callback, mm);
 
   // Init the connection supervisor worker thread
+  sem_init(&mm->sem, 0, 0);
   mm->do_exit = false;
   int rc = pthread_create(&(mm->connection_supervisor), NULL, &supervise, mm);
   if (rc != 0) {
@@ -243,7 +213,9 @@ void jack_finish(void* arg)
   }
 
   mm->do_exit = true;
+  sem_post(&mm->sem);
   pthread_join(mm->connection_supervisor, NULL);
+  sem_destroy(&mm->sem);
   jack_ringbuffer_free(mm->ports_to_connect);
 
   free(mm);
