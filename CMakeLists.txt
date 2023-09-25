@@ -1,6 +1,7 @@
 # ISC License
 #
 # Copyright (c) 2018 Jakob Dübel
+# Copyright (c) 2019-2023 Filipe Coelho
 #
 # Permission to use, copy, modify, and/or distribute this software for
 # any purpose with or without fee is hereby granted, provided that the
@@ -23,29 +24,28 @@ project(mod-midi-merger
     VERSION 0.1.0
     LANGUAGES C)
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-unused-parameter")
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_BUILD_TYPE Release)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-unused-parameter")
+# Required dependencies
+find_package(PkgConfig REQUIRED)
+find_package(Threads REQUIRED)
 
-# Jack dependency
-find_package(Jack REQUIRED)
-include_directories(${JACK_INCLUDE_DIRS})
-set(LIBS ${LIBS} ${JACK_LIBRARIES})
-
-# Pthread dependency
-find_package(Threads)
-set(LIBS ${LIBS} ${CMAKE_THREAD_LIBS_INIT})
+# Set libs
+pkg_check_modules(JACK2 IMPORTED_TARGET REQUIRED jack)
+set(LIBS ${LIBS} PkgConfig::JACK2 ${CMAKE_THREAD_LIBS_INIT})
 
 # Position independed code is set automatically
 add_library(${PROJECT_NAME} MODULE
             src/midi-merger.h src/midi-merger.c)
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES PREFIX "")
+target_link_libraries(${PROJECT_NAME} ${LIBS})
+set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 
 add_library(mod-midi-broadcaster MODULE
             src/midi-broadcaster.h src/midi-broadcaster.c)
-SET_TARGET_PROPERTIES(mod-midi-broadcaster PROPERTIES PREFIX "")
+target_link_libraries(mod-midi-broadcaster ${LIBS})
+set_target_properties(mod-midi-broadcaster PROPERTIES PREFIX "")
 
 add_executable(${PROJECT_NAME}-standalone
                src/standalone-midi-merger.c
