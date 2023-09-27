@@ -131,7 +131,8 @@ static void port_registration_callback(jack_port_id_t port_id, int is_registered
 
     // Check if MIDI output
     if ((jack_port_flags(source) & target_port_flags) == target_port_flags) {
-      if (strcmp(jack_port_type(source), JACK_DEFAULT_MIDI_TYPE) == 0) {
+      const char *const ptype = jack_port_type(source);
+      if (ptype && strcmp(ptype, JACK_DEFAULT_MIDI_TYPE) == 0) {
 
         // We can't call jack_connect here in the callback,
         // Schedule the connection for later.
