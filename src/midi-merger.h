@@ -9,8 +9,9 @@
 #include <jack/midiport.h>
 #include <jack/ringbuffer.h>
 #include <pthread.h>
-#include <semaphore.h>
 #include <stdbool.h>
+
+#include "mod-semaphore.h"
 
 enum Ports {
     PORT_IN,
