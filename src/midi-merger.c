@@ -220,6 +220,9 @@ int jack_initialize(jack_client_t* client, const char* load_init)
     const char* const ourportname = jack_port_name(mm->ports[PORT_IN]);
 
     for (int i=0; ports[i] != NULL; ++i) {
+      if (strncmp(ports[i], "system_midi:Midi Through", 24) == 0)
+        continue;
+
       if (strncmp(ports[i], "system:midi_capture_", 20) == 0 || strncmp(ports[i], "system_midi:capture_", 20) == 0) {
         if (jack_port_get_aliases(jack_port_by_name(client, ports[i]), aliasesptr) > 0) {
           if (strncmp(aliases[0], "alsa_pcm:Midi-Through/", 22) == 0) {
